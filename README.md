@@ -1,36 +1,110 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# reso
+
+A social-first, AI-native music discovery platform that connects users through shared musical interests and personalized recommendations.
+
+![reso](https://place-hold.it/300x300/333/fff&text=reso)
+
+## Features
+
+- **Daily AI-Curated Recommendations** - Personalized music suggestions with AI-generated explanations
+- **Social Music Profiles** - User profiles showcasing music taste, favorite genres, and listening statistics
+- **Music Sharing & Reactions** - Dedicated music messaging channel for sharing songs with context
+- **Collaborative Playlists** - AI-assisted shared playlists that fit the vibe and appeal to all contributors
+
+## Tech Stack
+
+- **Next.js** - React framework for both frontend and backend
+- **TypeScript** - Type-safe programming language
+- **TailwindCSS** - Utility-first CSS framework for styling
+- **shadcn/ui** - Reusable UI component system
+- **Prisma** - ORM for database operations
+- **React Query** - Data fetching and state management
+- **Phosphor Icons** - Beautiful and consistent icons with duotone weight
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Node.js (v18+)
+- npm or pnpm
+- PostgreSQL database
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/reso.git
+   cd reso
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   # or
+   pnpm install
+   ```
+
+3. Create a `.env` file in the root directory with the following variables:
+   ```
+   DATABASE_URL="postgresql://username:password@localhost:5432/reso"
+   ```
+
+4. Set up the database:
+   ```bash
+   npx prisma db push
+   ```
+
+5. Start the development server:
+   ```bash
+   npm run dev
+   # or
+   pnpm dev
+   ```
+
+6. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
+
+## Project Structure
+
+```
+reso/
+├── src/                      # Source files
+│   ├── app/                  # App Router pages and layouts
+│   │   ├── ui/               # shadcn/ui components
+│   │   ├── layout/           # Layout components
+│   │   ├── music/            # Music-specific components
+│   │   └── profiles/         # User profile components
+│   └── lib/                  # Utility functions and helpers
+├── prisma/                   # Prisma schema and migrations
+│   └── schema.prisma         # Database schema
+├── public/                   # Static assets
+└── docs/                     # Documentation
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Development Workflow
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Create a new branch for your feature:
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2. Make your changes and commit them:
+   ```bash
+   git add .
+   git commit -m "Add your feature"
+   ```
 
-## Learn More
+3. Push your branch to the remote repository:
+   ```bash
+   git push origin feature/your-feature-name
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+4. Create a pull request from your branch to the main branch.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## License
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Deploy on Vercel
+## Acknowledgments
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Design inspiration from various music streaming platforms
+- Documentation and best practices from Next.js, Prisma, and shadcn/ui

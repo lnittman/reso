@@ -1,0 +1,135 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String           @id @default(cuid())
+  name           String
+  email          String           @unique
+  image          String?
+  bio            String?
+  profiles       MusicProfile[]
+  playlists      Playlist[]
+  recommendations Recommendation[]
+  sharedSongs    SharedSong[]     @relation("SentSongs")
+  receivedSongs  SharedSong[]     @relation("ReceivedSongs")
+  followers      Follow[]         @relation("Following")
+  following      Follow[]         @relation("Follower")
+  playlistCollaborations PlaylistCollaborator[]
+  playlistSongs  PlaylistSong[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+}
+
+model MusicProfile {
+  id             String           @id @default(cuid())
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+  favoriteGenres String[]
+  listeningStats Json?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+}
+
+model Playlist {
+  id             String           @id @default(cuid())
+  name           String
+  description    String?
+  coverImage     String?
+  creator        User             @relation(fields: [creatorId], references: [id])
+  creatorId      String
+  collaborators  PlaylistCollaborator[]
+  songs          PlaylistSong[]
+  isPublic       Boolean          @default(false)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+}
+
+model PlaylistCollaborator {
+  id             String           @id @default(cuid())
+  playlist       Playlist         @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  playlistId     String
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+  addedAt        DateTime         @default(now())
+
+  @@unique([playlistId, userId])
+}
+
+model Song {
+  id             String           @id @default(cuid())
+  title          String
+  artist         String
+  album          String?
+  coverUrl       String?
+  duration       Int?             // Duration in seconds
+  genres         String[]
+  playCount      Int              @default(0)
+  externalId     String?          // ID from external music service
+  externalUrl    String?          // URL to the song on external service
+  playlists      PlaylistSong[]
+  recommendations Recommendation[]
+  sharedInstances SharedSong[]
+  createdAt      DateTime         @default(now())
+}
+
+model PlaylistSong {
+  id             String           @id @default(cuid())
+  playlist       Playlist         @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  playlistId     String
+  song           Song             @relation(fields: [songId], references: [id], onDelete: Cascade)
+  songId         String
+  addedBy        User             @relation(fields: [addedById], references: [id])
+  addedById      String
+  addedAt        DateTime         @default(now())
+  order          Int
+
+  @@unique([playlistId, songId])
+}
+
+model Recommendation {
+  id             String           @id @default(cuid())
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+  song           Song             @relation(fields: [songId], references: [id], onDelete: Cascade)
+  songId         String
+  explanation    String?
+  isLiked        Boolean?
+  createdAt      DateTime         @default(now())
+}
+
+model SharedSong {
+  id             String           @id @default(cuid())
+  song           Song             @relation(fields: [songId], references: [id], onDelete: Cascade)
+  songId         String
+  sender         User             @relation("SentSongs", fields: [senderId], references: [id], onDelete: Cascade)
+  senderId       String
+  recipient      User             @relation("ReceivedSongs", fields: [recipientId], references: [id], onDelete: Cascade)
+  recipientId    String
+  message        String?
+  reaction       String?
+  isRead         Boolean          @default(false)
+  createdAt      DateTime         @default(now())
+}
+
+model Follow {
+  id            String    @id @default(cuid())
+  follower      User      @relation("Follower", fields: [followerId], references: [id], onDelete: Cascade)
+  followerId    String
+  following     User      @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
+  followingId   String
+  createdAt     DateTime  @default(now())
+
+  @@unique([followerId, followingId])
+}
