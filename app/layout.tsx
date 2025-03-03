@@ -3,7 +3,8 @@ import type { Metadata } from 'next';
 import '@/app/globals.css';
 import MainLayout from '@/src/components/layout/MainLayout';
 import { Toaster } from '@/components/ui/sonner';
-import { SessionProvider } from '@/components/auth/SessionProvider';
+import { AuthSync } from '@/src/components/auth/AuthSync';
+import NextAuthProvider from '@/src/components/auth/NextAuthProvider';
 
 export const metadata: Metadata = {
   title: 'reso - Social Music Discovery',
@@ -18,12 +19,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <SessionProvider>
+        <NextAuthProvider>
+          <AuthSync />
+          
           <MainLayout>
             {children}
           </MainLayout>
           <Toaster />
-        </SessionProvider>
+        </NextAuthProvider>
       </body>
     </html>
   );

@@ -1,8 +1,11 @@
-import React from 'react';
+"use client";
+
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { MagnifyingGlass, Shuffle } from '@phosphor-icons/react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { useDiscoverStore } from '@/lib/store';
 
 // Mock genre data
 const genres = [
@@ -27,6 +30,39 @@ const moods = [
 ];
 
 export default function DiscoverPage() {
+  // Use the Zustand store instead of local state or context
+  const { 
+    genres, 
+    moods, 
+    selectedGenreId, 
+    selectedMoodId, 
+    searchQuery,
+    setSelectedGenreId,
+    setSelectedMoodId,
+    setSearchQuery
+  } = useDiscoverStore();
+  
+  // Handle search input
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+  
+  // Handle genre selection
+  const handleGenreClick = (genreId: string) => {
+    setSelectedGenreId(selectedGenreId === genreId ? null : genreId);
+  };
+  
+  // Handle mood selection
+  const handleMoodClick = (moodId: string) => {
+    setSelectedMoodId(selectedMoodId === moodId ? null : moodId);
+  };
+  
+  // Handle shuffle button click
+  const handleShuffle = () => {
+    const randomGenreIndex = Math.floor(Math.random() * genres.length);
+    setSelectedGenreId(genres[randomGenreIndex].id);
+  };
+
   return (
     <div className="space-y-8">
       <section className="space-y-4">
@@ -39,6 +75,8 @@ export default function DiscoverPage() {
           <Input 
             placeholder="Search for artists, songs, or albums..." 
             className="pl-10"
+            value={searchQuery}
+            onChange={handleSearchChange}
           />
         </div>
       </section>
@@ -46,14 +84,20 @@ export default function DiscoverPage() {
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-semibold">Browse by Genre</h2>
-          <Button variant="ghost" size="sm" className="gap-2">
+          <Button variant="ghost" size="sm" className="gap-2" onClick={handleShuffle}>
             {React.createElement(Shuffle, { className: "h-4 w-4", weight: "duotone" })}
             Shuffle
           </Button>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {genres.map((genre) => (
-            <Card key={genre.id} className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
+            <Card 
+              key={genre.id} 
+              className={`overflow-hidden hover:shadow-md transition-shadow cursor-pointer ${
+                selectedGenreId === genre.id ? 'ring-2 ring-primary' : ''
+              }`}
+              onClick={() => handleGenreClick(genre.id)}
+            >
               <div className={`h-2 ${genre.color}`} />
               <CardContent className="p-4">
                 <p className="font-medium">{genre.name}</p>
@@ -67,7 +111,13 @@ export default function DiscoverPage() {
         <h2 className="text-2xl font-semibold">Explore by Mood</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {moods.map((mood) => (
-            <Card key={mood.id} className="text-center hover:shadow-md transition-shadow cursor-pointer">
+            <Card 
+              key={mood.id} 
+              className={`text-center hover:shadow-md transition-shadow cursor-pointer ${
+                selectedMoodId === mood.id ? 'ring-2 ring-primary' : ''
+              }`}
+              onClick={() => handleMoodClick(mood.id)}
+            >
               <CardContent className="p-4">
                 <p className="text-3xl mb-2">{mood.emoji}</p>
                 <p className="font-medium">{mood.name}</p>
