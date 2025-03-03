@@ -53,6 +53,18 @@ export const authOptions: NextAuthOptions = {
   debug: process.env.NODE_ENV === 'development',
 };
 
+// Extend the built-in Session type to include user ID
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id: string;
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+    }
+  }
+}
+
 // Helper function to get the current session
 export async function getCurrentSession() {
   return getServerSession(authOptions);

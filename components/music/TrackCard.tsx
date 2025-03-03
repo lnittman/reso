@@ -1,7 +1,7 @@
 import React from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/src/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { PlayIcon, HeartIcon, ShareIcon, MoreHorizontalIcon } from 'lucide-react';
-import { Button } from '@/src/components/ui/button';
+import { Button } from '@/components/ui/button';
 
 interface Track {
   title: string;

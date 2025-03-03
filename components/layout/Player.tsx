@@ -8,7 +8,7 @@ import {
   RepeatIcon,
   ShuffleIcon
 } from 'lucide-react';
-import { Slider } from '@/src/components/ui/slider';
+import { Slider } from '@/components/ui/slider';
 
 const Player = () => {
   // This would be managed by a proper state management system in a real implementation

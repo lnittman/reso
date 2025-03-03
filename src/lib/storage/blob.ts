@@ -13,7 +13,7 @@ export async function uploadFile(
     filename?: string;
     folder?: string;
     contentType?: string;
-    access?: 'public' | 'private';
+    access?: 'public';
   }
 ) {
   const {
