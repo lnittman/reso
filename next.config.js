@@ -11,8 +11,13 @@ const nextConfig = {
   // Use React 18 compatibility mode
   reactStrictMode: true,
   experimental: {
-    // Disable React server components for now
-    serverComponentsExternalPackages: [],
+    // External packages that should be resolved by Server Components
+    serverExternalPackages: [],
+  },
+  // Compiler options
+  compiler: {
+    // Use traditional JSX transform instead of automatic JSX runtime
+    styledComponents: true,
   },
   // Webpack configuration to resolve React issues
   webpack: (config, { isServer }) => {
