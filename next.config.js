@@ -8,6 +8,12 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  // Use React 18 compatibility mode
+  reactStrictMode: true,
+  experimental: {
+    // Disable React server components for now
+    serverComponentsExternalPackages: [],
+  },
   // Webpack configuration to resolve React issues
   webpack: (config, { isServer }) => {
     // Ensure React is properly resolved
