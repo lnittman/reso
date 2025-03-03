@@ -7,4 +7,5 @@
 export { useUIStore } from './uiStore';
 export { useAuthStore } from './authStore';
 export { useMusicStore } from './musicStore';
-export { useDiscoverStore } from './discoverStore'; 
+export { useDiscoverStore } from './discoverStore';
+export { useProfileStore } from './profileStore'; 

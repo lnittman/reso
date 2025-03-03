@@ -1,94 +1,35 @@
-import React from 'react';
+"use client";
+
+import React, { useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { PencilSimple, PlayCircle, Heart, UsersThree, Playlist } from '@phosphor-icons/react';
-
-// Mock user data
-const user = {
-  name: 'Alex Johnson',
-  username: 'alexj',
-  bio: 'Music enthusiast with a passion for discovering new artists and genres. Always on the lookout for fresh sounds.',
-  avatar: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Alex',
-  stats: {
-    followers: 248,
-    following: 186,
-    tracks: 1342,
-    favGenres: ['Electronic', 'Indie', 'Hip Hop']
-  }
-};
-
-// Mock favorite tracks
-const favoriteTracks = [
-  {
-    id: '1',
-    title: 'Late Night Talking',
-    artist: 'Harry Styles',
-    album: 'Harry\'s House',
-    coverImage: 'https://place-hold.it/300x300/333/fff&text=HS',
-    playCount: 47
-  },
-  {
-    id: '2',
-    title: 'As It Was',
-    artist: 'Harry Styles',
-    album: 'Harry\'s House',
-    coverImage: 'https://place-hold.it/300x300/333/fff&text=HS',
-    playCount: 36
-  },
-  {
-    id: '3',
-    title: 'Break My Soul',
-    artist: 'Beyoncé',
-    album: 'Renaissance',
-    coverImage: 'https://place-hold.it/300x300/333/fff&text=B',
-    playCount: 29
-  },
-  {
-    id: '4',
-    title: 'RESENTMENT (feat. Kanna)',
-    artist: 'Fred again..',
-    album: 'USB Flash Drive',
-    coverImage: 'https://place-hold.it/300x300/333/fff&text=FA',
-    playCount: 25
-  },
-  {
-    id: '5',
-    title: 'Anti-Hero',
-    artist: 'Taylor Swift',
-    album: 'Midnights',
-    coverImage: 'https://place-hold.it/300x300/333/fff&text=TS',
-    playCount: 21
-  },
-];
-
-// Mock playlists
-const playlists = [
-  {
-    id: '1',
-    name: 'Summer Vibes 2023',
-    description: 'Perfect playlist for sunny days',
-    coverImage: 'https://place-hold.it/300x300/333/fff&text=SV',
-    trackCount: 23
-  },
-  {
-    id: '2',
-    name: 'Workout Mix',
-    description: 'High energy tracks to keep you moving',
-    coverImage: 'https://place-hold.it/300x300/333/fff&text=WM',
-    trackCount: 18
-  },
-  {
-    id: '3',
-    name: 'Late Night Coding',
-    description: 'Focus-enhancing music for productive sessions',
-    coverImage: 'https://place-hold.it/300x300/333/fff&text=LNC',
-    trackCount: 32
-  },
-];
+import { useProfileStore } from '@/lib/store';
 
 export default function ProfilePage() {
+  // Use the Zustand store instead of local state or context
+  const { 
+    profile, 
+    favoriteTracks, 
+    playlists, 
+    activeTab, 
+    setActiveTab 
+  } = useProfileStore();
+  
+  // Handle tab change
+  const handleTabChange = (value: string) => {
+    if (value === 'favorites' || value === 'playlists' || value === 'stats') {
+      setActiveTab(value);
+    }
+  };
+  
+  // If profile is not loaded, show loading state
+  if (!profile) {
+    return <div>Loading profile...</div>;
+  }
+
   return (
     <div className="space-y-8">
       {/* Profile Header */}
@@ -96,26 +37,26 @@ export default function ProfilePage() {
         <CardContent className="p-6 space-y-4">
           <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
             <Avatar className="h-24 w-24 border-4 border-background">
-              <AvatarImage src={user.avatar} alt={user.name} />
-              <AvatarFallback>{user.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+              <AvatarImage src={profile.avatar} alt={profile.name} />
+              <AvatarFallback>{profile.name.slice(0, 2).toUpperCase()}</AvatarFallback>
             </Avatar>
             <div className="flex-1 text-center md:text-left space-y-2">
               <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
-                <h1 className="text-2xl font-bold">{user.name}</h1>
-                <p className="text-muted-foreground">@{user.username}</p>
+                <h1 className="text-2xl font-bold">{profile.name}</h1>
+                <p className="text-muted-foreground">@{profile.username}</p>
               </div>
-              <p>{user.bio}</p>
+              <p>{profile.bio}</p>
               <div className="flex flex-wrap gap-4 justify-center md:justify-start">
                 <div className="text-center">
-                  <p className="font-semibold">{user.stats.followers}</p>
+                  <p className="font-semibold">{profile.stats.followers}</p>
                   <p className="text-sm text-muted-foreground">Followers</p>
                 </div>
                 <div className="text-center">
-                  <p className="font-semibold">{user.stats.following}</p>
+                  <p className="font-semibold">{profile.stats.following}</p>
                   <p className="text-sm text-muted-foreground">Following</p>
                 </div>
                 <div className="text-center">
-                  <p className="font-semibold">{user.stats.tracks}</p>
+                  <p className="font-semibold">{profile.stats.tracks}</p>
                   <p className="text-sm text-muted-foreground">Tracks</p>
                 </div>
               </div>
@@ -129,7 +70,7 @@ export default function ProfilePage() {
       </Card>
 
       {/* Profile Content */}
-      <Tabs defaultValue="favorites" className="space-y-6">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
         <TabsList className="grid grid-cols-3 w-full max-w-md mx-auto">
           <TabsTrigger value="favorites">Favorites</TabsTrigger>
           <TabsTrigger value="playlists">Playlists</TabsTrigger>
@@ -211,7 +152,7 @@ export default function ProfilePage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {user.stats.favGenres.map((genre, index) => (
+                  {profile.stats.favGenres.map((genre, index) => (
                     <div key={genre} className="flex items-center gap-4">
                       <div className="h-10 w-10 rounded-md bg-primary/10 flex items-center justify-center">
                         <span className="font-medium">{index + 1}</span>
@@ -249,9 +190,10 @@ export default function ProfilePage() {
                 <CardTitle>Listening Overview</CardTitle>
                 <CardDescription>Your music activity over time</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="h-60 flex items-center justify-center bg-accent rounded-md">
-                  <p className="text-muted-foreground">Listening history visualization would appear here</p>
+              <CardContent className="h-80 flex items-center justify-center">
+                <div className="text-center space-y-2 text-muted-foreground">
+                  <p>Listening statistics visualization will appear here</p>
+                  <p className="text-sm">Coming soon</p>
                 </div>
               </CardContent>
             </Card>
