@@ -51,7 +51,7 @@ async function generatePlaylistTracks(userId: string, params: PlaylistParams): P
   });
   
   // Ensure uniqueness and limit to 20 tracks
-  trackIds = [...new Set(trackIds)].slice(0, 20);
+  trackIds = Array.from(new Set(trackIds)).slice(0, 20);
   
   return trackIds;
 }

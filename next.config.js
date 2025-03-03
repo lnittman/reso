@@ -8,9 +8,7 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   // Strict React mode
-  reactStrictMode: true,
-  // Simpler configuration without experimental features
-  swcMinify: true
+  reactStrictMode: true
 };
 
 module.exports = nextConfig; 

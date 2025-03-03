@@ -1,3 +1,4 @@
+import React from 'react';
 import { DailyRecommendations } from '@/components/music/DailyRecommendations';
 
 export default function Home() {

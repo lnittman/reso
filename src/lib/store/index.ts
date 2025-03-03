@@ -1,3 +1,3 @@
-export { usePlayerStore } from './usePlayerStore';
-export { useUIStore } from './useUIStore';
-export { useMusicStore } from './useMusicStore'; 
+export { usePlayerStore } from './playerStore';
+export { useUIStore } from './uiStore';
+export { useMusicStore } from './musicStore'; 

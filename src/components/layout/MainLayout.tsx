@@ -28,7 +28,7 @@ function MobileHeader() {
   );
 }
 
-export function MainLayout({ children }: MainLayoutProps) {
+export default function MainLayout({ children }: MainLayoutProps) {
   const { isSidebarOpen } = useUIStore();
   
   return (

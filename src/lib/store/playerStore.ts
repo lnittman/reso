@@ -34,7 +34,7 @@ export interface PlayerState {
 export const usePlayerStore = create<PlayerState>((set, get) => ({
   isPlaying: false,
   currentTrack: null,
-  volume: 80,
+  volume: 70,
   progress: 0,
   duration: 0,
   queue: [],
@@ -42,8 +42,8 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   playTrack: (track) => set({ 
     currentTrack: track, 
     isPlaying: true,
-    progress: 0,
-    duration: track.duration
+    duration: track.duration || 0,
+    progress: 0 
   }),
   
   pauseTrack: () => set({ isPlaying: false }),
@@ -51,34 +51,54 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   resumeTrack: () => set({ isPlaying: true }),
   
   nextTrack: () => {
-    const { queue } = get();
-    if (queue.length > 0) {
-      const nextTrack = queue[0];
-      const newQueue = queue.slice(1);
+    const { queue, currentTrack } = get();
+    if (queue.length === 0) return;
+    
+    const currentIndex = currentTrack 
+      ? queue.findIndex(track => track.id === currentTrack.id)
+      : -1;
+    
+    const nextIndex = currentIndex + 1 < queue.length ? currentIndex + 1 : 0;
+    
+    if (nextIndex >= 0 && nextIndex < queue.length) {
       set({ 
-        currentTrack: nextTrack, 
-        isPlaying: true,
+        currentTrack: queue[nextIndex],
         progress: 0,
-        duration: nextTrack.duration,
-        queue: newQueue
+        duration: queue[nextIndex].duration,
+        isPlaying: true
       });
     }
   },
   
   previousTrack: () => {
-    // In a real implementation, this would maintain a history of played tracks
-    set({ progress: 0 });
+    const { queue, currentTrack } = get();
+    if (queue.length === 0) return;
+    
+    const currentIndex = currentTrack 
+      ? queue.findIndex(track => track.id === currentTrack.id)
+      : -1;
+    
+    const prevIndex = currentIndex > 0 ? currentIndex - 1 : queue.length - 1;
+    
+    if (prevIndex >= 0 && prevIndex < queue.length) {
+      set({ 
+        currentTrack: queue[prevIndex],
+        progress: 0,
+        duration: queue[prevIndex].duration,
+        isPlaying: true
+      });
+    }
   },
   
   setVolume: (volume) => set({ volume }),
   
   setProgress: (progress) => set({ progress }),
   
-  addToQueue: (track) => set((state) => ({ 
-    queue: [...state.queue, track] 
+  addToQueue: (track) => set((state) => ({
+    queue: [...state.queue, track]
   })),
   
   removeFromQueue: (trackId) => set((state) => ({
     queue: state.queue.filter(track => track.id !== trackId)
-  })),
+  }))
 })); 

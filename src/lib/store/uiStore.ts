@@ -14,7 +14,7 @@ export interface UIState {
 export const useUIStore = create<UIState>((set) => ({
   isSidebarOpen: false,
   isPlayerExpanded: false,
-  theme: 'system',
+  theme: 'dark',
   
   toggleSidebar: () => set((state) => ({ 
     isSidebarOpen: !state.isSidebarOpen 
@@ -24,5 +24,5 @@ export const useUIStore = create<UIState>((set) => ({
     isPlayerExpanded: !state.isPlayerExpanded 
   })),
   
-  setTheme: (theme) => set({ theme }),
+  setTheme: (theme) => set({ theme })
 })); 
