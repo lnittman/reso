@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import '@/app/globals.css';
-import MainLayout from '@/components/layout/MainLayout';
+import MainLayout from '@/src/components/layout/MainLayout';
 import { Toaster } from '@/components/ui/sonner';
 import { SessionProvider } from '@/components/auth/SessionProvider';
 

@@ -1,3 +1,5 @@
+"use client";
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -8,33 +10,42 @@ const mockRecommendations = [
   {
     id: '1',
     track: {
+      id: '1',
       title: 'Motion',
       artist: 'Fred Again..',
       album: 'USB Flash Drive',
-      coverImage: 'https://place-hold.it/300x300/333/fff&text=Motion',
-      duration: 210
+      coverUrl: 'https://place-hold.it/300x300/333/fff&text=Motion',
+      duration: 210,
+      genres: ['Electronic', 'UK Garage'],
+      playCount: 15000
     },
     explanation: 'Based on your interest in electronic music with emotive vocals, this track combines ambient textures with UK garage influences.'
   },
   {
     id: '2',
     track: {
+      id: '2',
       title: 'Bitch, Don\'t Kill My Vibe',
       artist: 'Kendrick Lamar',
       album: 'good kid, m.A.A.d city',
-      coverImage: 'https://place-hold.it/300x300/333/fff&text=GKMC',
-      duration: 308
+      coverUrl: 'https://place-hold.it/300x300/333/fff&text=GKMC',
+      duration: 308,
+      genres: ['Hip-Hop', 'Rap'],
+      playCount: 25000
     },
     explanation: 'Your listening history shows appreciation for lyrical hip-hop with introspective themes, which is a hallmark of this track.'
   },
   {
     id: '3',
     track: {
+      id: '3',
       title: 'Heather',
       artist: 'Conan Gray',
       album: 'Kid Krow',
-      coverImage: 'https://place-hold.it/300x300/333/fff&text=Heather',
-      duration: 198
+      coverUrl: 'https://place-hold.it/300x300/333/fff&text=Heather',
+      duration: 198,
+      genres: ['Indie Pop', 'Alternative'],
+      playCount: 18000
     },
     explanation: 'This recommendation stems from your recent exploration of indie pop with vulnerable lyrics and minimalist production.'
   },

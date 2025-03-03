@@ -4,8 +4,9 @@ import React from 'react';
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Play, Heart, Plus, Shuffle } from "@phosphor-icons/react";
-import { usePlayerStore, useMusicStore } from '@/lib/store';
+import { Share, Heart, Plus } from "@phosphor-icons/react";
+import { useMusicStore } from '@/lib/store';
+import { toast } from 'sonner';
 
 type Track = {
   id: string;
@@ -29,14 +30,14 @@ export function TrackCard({ track, explanation }: TrackCardProps) {
     console.log("TrackCard received:", track);
   }, [track]);
   
-  const playerStore = usePlayerStore();
   const musicStore = useMusicStore();
   
   // Use optional chaining and nullish coalescing to safely access properties
   const liked = musicStore?.likedTracks?.includes(track?.id) ?? false;
 
-  const handlePlay = () => {
-    playerStore?.playTrack?.(track);
+  const handleShare = () => {
+    // In a real implementation, this would open a share dialog
+    toast.success("Share feature coming soon!");
   };
 
   const handleLike = () => {
@@ -61,8 +62,8 @@ export function TrackCard({ track, explanation }: TrackCardProps) {
             className="h-full w-full object-cover"
           />
           <div className="absolute bottom-2 right-2 flex gap-2">
-            <Button size="icon" variant="secondary" className="rounded-full h-10 w-10" onClick={handlePlay}>
-              {React.createElement(Play, { size: 18, weight: "duotone" })}
+            <Button size="icon" variant="secondary" className="rounded-full h-10 w-10" onClick={handleShare}>
+              {React.createElement(Share, { size: 18, weight: "duotone" })}
             </Button>
           </div>
         </div>

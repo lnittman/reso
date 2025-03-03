@@ -9,127 +9,266 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
+// User account and profile
 model User {
-  id             String           @id @default(cuid())
-  name           String
-  email          String           @unique
-  image          String?
-  bio            String?
-  profiles       MusicProfile[]
-  playlists      Playlist[]
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  
+  // User preferences
+  musicServices      UserMusicService[]
+  preferredGenres    String[]
+  preferredMoods     String[]
+  
+  // User content
+  playlists          Playlist[]           @relation("CreatedPlaylists")
+  collaborations     PlaylistCollaborator[]
+  likedPlaylists     PlaylistLike[]
+  likedTracks        TrackLike[]
+  
+  // Social connections
+  followers          Follow[]             @relation("FollowedUser")
+  following          Follow[]             @relation("FollowingUser")
+  
+  // Activity
+  interactions       LLMInteraction[]
+  recommendations    Recommendation[]
+  sharedPlaylists    SharedPlaylist[]     @relation("SenderSharedPlaylists")
+  receivedPlaylists  SharedPlaylist[]     @relation("ReceiverSharedPlaylists")
+  
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+}
+
+// NextAuth models
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// Music service connections
+model UserMusicService {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  service      String   // "spotify", "apple", "youtube"
+  accountId    String
+  refreshToken String?  @db.Text
+  accessToken  String?  @db.Text
+  expiresAt    DateTime?
+  scopes       String[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([userId, service])
+}
+
+// Song data
+model Song {
+  id           String   @id @default(cuid())
+  title        String
+  artist       String
+  album        String?
+  releaseYear  String?
+  genres       String[]
+  duration     String?
+  popularity   Int?     @default(0)
+  lyrics       String?  @db.Text
+  coverArtUrl  String?
+  
+  // External IDs
+  spotifyId    String?  @unique
+  appleMusicId String?  @unique
+  youtubeId    String?  @unique
+  
+  // Rich metadata from web sources
+  sourceUrls   SongSource[]
+  
+  // Relationships
+  playlistItems PlaylistItem[]
   recommendations Recommendation[]
-  sharedSongs    SharedSong[]     @relation("SentSongs")
-  receivedSongs  SharedSong[]     @relation("ReceivedSongs")
-  followers      Follow[]         @relation("Following")
-  following      Follow[]         @relation("Follower")
-  playlistCollaborations PlaylistCollaborator[]
-  playlistSongs  PlaylistSong[]
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
+  likes        TrackLike[]
+  
+  // System metadata
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
-model MusicProfile {
-  id             String           @id @default(cuid())
-  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId         String
-  favoriteGenres String[]
-  listeningStats Json?
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
+// Sources where song data was extracted from
+model SongSource {
+  id           String   @id @default(cuid())
+  songId       String
+  song         Song     @relation(fields: [songId], references: [id], onDelete: Cascade)
+  url          String
+  extractedAt  DateTime
+  dataQuality  Int      // Score from 1-10 indicating data quality
+  
+  @@unique([songId, url])
+  @@index([url])
 }
 
+// Playlist models
 model Playlist {
-  id             String           @id @default(cuid())
-  name           String
-  description    String?
-  coverImage     String?
-  creator        User             @relation(fields: [creatorId], references: [id])
-  creatorId      String
-  collaborators  PlaylistCollaborator[]
-  songs          PlaylistSong[]
-  isPublic       Boolean          @default(false)
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  isPrivate   Boolean  @default(false)
+  
+  // Relationships
+  creatorId   String
+  creator     User     @relation("CreatedPlaylists", fields: [creatorId], references: [id])
+  collaborators PlaylistCollaborator[]
+  items       PlaylistItem[]
+  likes       PlaylistLike[]
+  shares      SharedPlaylist[]
+  
+  // AI metadata
+  isAIGenerated Boolean @default(false)
+  aiPrompt      String? @db.Text
+  aiExplanation String? @db.Text
+  interactionId String?
+  
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model PlaylistCollaborator {
-  id             String           @id @default(cuid())
-  playlist       Playlist         @relation(fields: [playlistId], references: [id], onDelete: Cascade)
-  playlistId     String
-  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId         String
-  addedAt        DateTime         @default(now())
+  id          String   @id @default(cuid())
+  playlistId  String
+  playlist    Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  canEdit     Boolean  @default(true)
+  addedAt     DateTime @default(now())
 
   @@unique([playlistId, userId])
 }
 
-model Song {
-  id             String           @id @default(cuid())
-  title          String
-  artist         String
-  album          String?
-  coverUrl       String?
-  duration       Int?             // Duration in seconds
-  genres         String[]
-  playCount      Int              @default(0)
-  externalId     String?          // ID from external music service
-  externalUrl    String?          // URL to the song on external service
-  playlists      PlaylistSong[]
-  recommendations Recommendation[]
-  sharedInstances SharedSong[]
-  createdAt      DateTime         @default(now())
-}
-
-model PlaylistSong {
-  id             String           @id @default(cuid())
-  playlist       Playlist         @relation(fields: [playlistId], references: [id], onDelete: Cascade)
-  playlistId     String
-  song           Song             @relation(fields: [songId], references: [id], onDelete: Cascade)
-  songId         String
-  addedBy        User             @relation(fields: [addedById], references: [id])
-  addedById      String
-  addedAt        DateTime         @default(now())
-  order          Int
+model PlaylistItem {
+  id          String   @id @default(cuid())
+  playlistId  String
+  playlist    Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  songId      String
+  song        Song     @relation(fields: [songId], references: [id])
+  position    Int
+  addedAt     DateTime @default(now())
+  explanation String?  // Why this song was added (especially for AI playlists)
 
   @@unique([playlistId, songId])
+  @@index([playlistId, position])
 }
 
-model Recommendation {
-  id             String           @id @default(cuid())
-  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId         String
-  song           Song             @relation(fields: [songId], references: [id], onDelete: Cascade)
-  songId         String
-  explanation    String?
-  isLiked        Boolean?
-  createdAt      DateTime         @default(now())
+model PlaylistLike {
+  id          String   @id @default(cuid())
+  playlistId  String
+  playlist    Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@unique([playlistId, userId])
 }
 
-model SharedSong {
-  id             String           @id @default(cuid())
-  song           Song             @relation(fields: [songId], references: [id], onDelete: Cascade)
-  songId         String
-  sender         User             @relation("SentSongs", fields: [senderId], references: [id], onDelete: Cascade)
-  senderId       String
-  recipient      User             @relation("ReceivedSongs", fields: [recipientId], references: [id], onDelete: Cascade)
-  recipientId    String
-  message        String?
-  reaction       String?
-  isRead         Boolean          @default(false)
-  createdAt      DateTime         @default(now())
+model TrackLike {
+  id          String   @id @default(cuid())
+  songId      String
+  song        Song     @relation(fields: [songId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@unique([songId, userId])
 }
 
+// Social models
 model Follow {
-  id            String    @id @default(cuid())
-  follower      User      @relation("Follower", fields: [followerId], references: [id], onDelete: Cascade)
+  id            String   @id @default(cuid())
   followerId    String
-  following     User      @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
-  followingId   String
-  createdAt     DateTime  @default(now())
+  follower      User     @relation("FollowingUser", fields: [followerId], references: [id], onDelete: Cascade)
+  followedId    String
+  followed      User     @relation("FollowedUser", fields: [followedId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
 
-  @@unique([followerId, followingId])
+  @@unique([followerId, followedId])
+}
+
+model SharedPlaylist {
+  id          String   @id @default(cuid())
+  playlistId  String
+  playlist    Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  senderId    String
+  sender      User     @relation("SenderSharedPlaylists", fields: [senderId], references: [id])
+  receiverId  String
+  receiver    User     @relation("ReceiverSharedPlaylists", fields: [receiverId], references: [id])
+  message     String?
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+// Recommendation models
+model Recommendation {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  songId      String
+  song        Song     @relation(fields: [songId], references: [id])
+  explanation String?
+  interactionId String? // Link to the LLM interaction that created this
+  isLiked     Boolean?
+  createdAt   DateTime @default(now())
+}
+
+// LLM Interaction tracking
+model LLMInteraction {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type          String   // "playlist", "recommendation", etc.
+  prompt        String   @db.Text
+  response      String   @db.Text
+  tokenCount    Int?
+  model         String?
+  latencyMs     Int?
+  metadata      Json?    // Additional interaction metadata
+  createdAt     DateTime @default(now())
 }
