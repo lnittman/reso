@@ -1,59 +1,52 @@
 "use client";
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { PlusCircle } from '@phosphor-icons/react';
+import { toast } from 'sonner';
 
-// Mock genre options
-const GENRE_OPTIONS = [
-  "Pop", "Rock", "Hip Hop", "R&B", "Jazz", "Classical", "Electronic", 
-  "Folk", "Country", "Blues", "Metal", "Punk", "Reggae", "Soul", 
-  "Funk", "Disco", "House", "Techno", "Ambient", "Indie"
+const POPULAR_GENRES = [
+  'Pop', 'Rock', 'Hip-Hop', 'R&B', 'Electronic', 'Jazz', 'Classical', 
+  'Country', 'Folk', 'Indie', 'Metal', 'Punk', 'Blues', 'Reggae', 'Soul'
 ];
 
 export default function ProfileSetup() {
-  const router = useRouter();
   const { data: session, status } = useSession({
     required: true,
     onUnauthenticated() {
       router.push('/auth/signin');
     },
   });
-
-  const [name, setName] = useState('');
+  
+  const router = useRouter();
+  const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
-  const [newGenre, setNewGenre] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  // Check if session is loading
+  const [customGenre, setCustomGenre] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Skip if already loading
   if (status === 'loading') {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <p className="text-lg text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    );
+    return <div className="flex min-h-screen items-center justify-center">Loading...</div>;
   }
-
+  
   const handleAddGenre = () => {
-    if (newGenre && !selectedGenres.includes(newGenre)) {
-      setSelectedGenres([...selectedGenres, newGenre]);
-      setNewGenre('');
+    if (customGenre && !selectedGenres.includes(customGenre)) {
+      setSelectedGenres([...selectedGenres, customGenre]);
+      setCustomGenre('');
     }
   };
-
+  
   const handleRemoveGenre = (genre: string) => {
     setSelectedGenres(selectedGenres.filter(g => g !== genre));
   };
-
+  
   const handleSelectGenre = (genre: string) => {
     if (selectedGenres.includes(genre)) {
       handleRemoveGenre(genre);
@@ -61,73 +54,91 @@ export default function ProfileSetup() {
       setSelectedGenres([...selectedGenres, genre]);
     }
   };
-
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-
+    
+    if (!username) {
+      toast.error('Please enter a username');
+      return;
+    }
+    
+    if (selectedGenres.length === 0) {
+      toast.error('Please select at least one genre');
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
     try {
-      // In a real implementation, we would make an API call to update the user profile
-      // For now, we'll just simulate a delay and redirect to the home page
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const response = await fetch('/api/users/profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username,
+          bio,
+          favoriteGenres: selectedGenres,
+        }),
+      });
       
-      // Redirect to home page after successful profile setup
+      if (!response.ok) {
+        throw new Error('Failed to create profile');
+      }
+      
+      toast.success('Profile created successfully!');
       router.push('/');
     } catch (error) {
-      console.error('Error setting up profile:', error);
+      console.error('Error creating profile:', error);
+      toast.error('Failed to create profile. Please try again.');
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
-
+  
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+    <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-2xl">
-        <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold">Complete Your Profile</CardTitle>
+        <CardHeader>
+          <CardTitle className="text-2xl">Complete Your Profile</CardTitle>
           <CardDescription>
-            Tell us about your musical preferences so we can tailor recommendations for you
+            Tell us about your music taste to get personalized recommendations
           </CardDescription>
         </CardHeader>
+        
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-6">
             <div className="space-y-2">
-              <label htmlFor="name" className="text-sm font-medium">
-                Display Name
-              </label>
+              <Label htmlFor="username">Username</Label>
               <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="How you want to be known on reso"
+                id="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Choose a unique username"
                 required
               />
             </div>
             
             <div className="space-y-2">
-              <label htmlFor="bio" className="text-sm font-medium">
-                Bio
-              </label>
+              <Label htmlFor="bio">Bio</Label>
               <Textarea
                 id="bio"
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
-                placeholder="Share a bit about your music taste and interests"
+                placeholder="Tell us about your music taste and interests"
                 rows={3}
               />
             </div>
-
-            <div className="space-y-4">
-              <label className="text-sm font-medium">
-                Favorite Genres
-              </label>
-              
+            
+            <div className="space-y-3">
+              <Label>Favorite Genres</Label>
               <div className="flex flex-wrap gap-2">
                 {selectedGenres.map((genre) => (
                   <Badge 
                     key={genre} 
                     variant="secondary"
-                    className="px-3 py-1 cursor-pointer"
+                    className="cursor-pointer"
                     onClick={() => handleRemoveGenre(genre)}
                   >
                     {genre} ✕
@@ -135,32 +146,27 @@ export default function ProfileSetup() {
                 ))}
               </div>
               
-              <div className="flex space-x-2">
+              <div className="flex gap-2">
                 <Input
-                  value={newGenre}
-                  onChange={(e) => setNewGenre(e.target.value)}
-                  placeholder="Add a genre"
+                  value={customGenre}
+                  onChange={(e) => setCustomGenre(e.target.value)}
+                  placeholder="Add a custom genre"
                   className="flex-1"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      handleAddGenre();
-                    }
-                  }}
                 />
                 <Button 
                   type="button" 
                   variant="outline" 
                   onClick={handleAddGenre}
+                  disabled={!customGenre}
                 >
-                  {React.createElement(PlusCircle, { size: 20, weight: "duotone" })}
+                  Add
                 </Button>
               </div>
               
-              <div>
-                <p className="text-sm text-muted-foreground mb-2">Popular genres:</p>
-                <div className="flex flex-wrap gap-2">
-                  {GENRE_OPTIONS.map((genre) => (
+              <div className="mt-2">
+                <Label className="text-sm text-muted-foreground">Popular Genres</Label>
+                <div className="flex flex-wrap gap-2 mt-1">
+                  {POPULAR_GENRES.map((genre) => (
                     <Badge 
                       key={genre} 
                       variant={selectedGenres.includes(genre) ? "default" : "outline"}
@@ -179,9 +185,9 @@ export default function ProfileSetup() {
             <Button 
               type="submit" 
               className="w-full" 
-              disabled={!name || selectedGenres.length === 0 || loading}
+              disabled={isSubmitting}
             >
-              {loading ? "Setting up your profile..." : "Continue to reso"}
+              {isSubmitting ? 'Creating Profile...' : 'Complete Setup'}
             </Button>
           </CardFooter>
         </form>

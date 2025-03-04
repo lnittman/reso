@@ -1,8 +1,8 @@
 "use client";
 
-import { useSession } from "next-auth/react";
-import { useEffect } from "react";
-import { useAuthStore } from "@/lib/store/authStore";
+import { useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { useAuthStore } from '@/lib/store';
 
 /**
  * AuthSync is a component that syncs NextAuth session state
@@ -15,23 +15,21 @@ export function AuthSync() {
   const { setUser, setAuthenticated, setLoading } = useAuthStore();
   
   useEffect(() => {
-    // Update auth store based on NextAuth session
-    if (status === 'loading') {
-      setLoading(true);
-    } else {
-      setLoading(false);
-      setAuthenticated(status === 'authenticated');
-      
-      if (session?.user) {
-        setUser({
-          id: session.user.id || session.user.email || 'unknown',
-          name: session.user.name || undefined,
-          email: session.user.email || undefined,
-          image: session.user.image || undefined
-        });
-      } else {
-        setUser(null);
-      }
+    // Update loading state based on NextAuth status
+    setLoading(status === 'loading');
+    
+    // Update auth state when session changes
+    if (status === 'authenticated' && session?.user) {
+      setUser({
+        id: session.user.id,
+        name: session.user.name || undefined,
+        email: session.user.email || undefined,
+        image: session.user.image || undefined,
+      });
+      setAuthenticated(true);
+    } else if (status === 'unauthenticated') {
+      setUser(null);
+      setAuthenticated(false);
     }
   }, [session, status, setUser, setAuthenticated, setLoading]);
   

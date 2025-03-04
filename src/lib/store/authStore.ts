@@ -6,7 +6,10 @@
  * to keep state in one place without relying on Context.
  */
 
+"use client";
+
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 export interface User {
   id: string;
@@ -28,15 +31,26 @@ export interface AuthState {
   logout: () => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-  // Initial state
-  user: null,
-  isAuthenticated: false,
-  isLoading: true,
-  
-  // Actions
-  setUser: (user) => set({ user }),
-  setAuthenticated: (isAuthenticated) => set({ isAuthenticated }),
-  setLoading: (isLoading) => set({ isLoading }),
-  logout: () => set({ user: null, isAuthenticated: false }),
-})); 
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      // Initial state
+      user: null,
+      isAuthenticated: false,
+      isLoading: true,
+      
+      // Actions
+      setUser: (user) => set({ user }),
+      setAuthenticated: (isAuthenticated) => set({ isAuthenticated }),
+      setLoading: (isLoading) => set({ isLoading }),
+      logout: () => set({ user: null, isAuthenticated: false }),
+    }),
+    {
+      name: 'auth-storage',
+      // Only persist non-sensitive data
+      partialize: (state) => ({
+        isAuthenticated: state.isAuthenticated,
+      }),
+    }
+  )
+); 
