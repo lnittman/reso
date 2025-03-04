@@ -40,10 +40,7 @@ function MobileHeader() {
         <div></div> // Empty div to maintain flex layout
       )}
       
-      <div className={cn(
-        "absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2",
-        !isAuthenticated && "relative left-0 top-0 transform-none"
-      )}>
+      <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
         <span className="text-2xl" aria-label="reso logo">💿</span>
       </div>
       
@@ -60,7 +57,10 @@ function MobileHeader() {
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuLabel className="flex items-center gap-2">
+              <span className="text-xl">💿</span>
+              <span>reso</span>
+            </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
               <Link href="/profile">Profile</Link>
@@ -106,7 +106,10 @@ function DesktopHeader() {
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuLabel className="flex items-center gap-2">
+              <span className="text-xl">💿</span>
+              <span>reso</span>
+            </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
               <Link href="/profile">Profile</Link>
