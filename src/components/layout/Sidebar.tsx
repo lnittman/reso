@@ -62,7 +62,8 @@ export function Sidebar() {
     >
       <div className="flex flex-col h-full px-3 py-4">
         <div className="mb-6 px-3">
-          <h1 className="text-2xl font-bold">
+          <h1 className="text-2xl font-bold flex items-center gap-2">
+            <span className="text-2xl">💿</span>
             <Link href="/">reso</Link>
           </h1>
         </div>

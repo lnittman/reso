@@ -14,7 +14,7 @@ function MobileHeader() {
   const { toggleSidebar } = useUIStore();
   
   return (
-    <header className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-background border-b z-20 px-4 flex items-center">
+    <header className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-background border-b z-20 px-4 flex items-center justify-between">
       <button 
         className="text-foreground p-2 rounded-md"
         onClick={toggleSidebar}
@@ -22,7 +22,10 @@ function MobileHeader() {
       >
         {React.createElement(List, { size: 24, weight: "duotone" })}
       </button>
-      <h1 className="ml-2 text-xl font-bold">reso</h1>
+      <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+        <span className="text-2xl" aria-label="reso logo">💿</span>
+      </div>
+      <div className="w-10"></div> {/* Empty div for balanced spacing */}
     </header>
   );
 }

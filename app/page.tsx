@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Robot, Users, Plus, MusicNotes, Shuffle } from "@phosphor-icons/react";
+import { Robot, Users, Plus, MusicNotes, Shuffle, CaretDown, CaretUp } from "@phosphor-icons/react";
 import { toast } from "sonner";
 
 // Mock data for friend activity
@@ -91,6 +91,7 @@ const aiPlaylistIdeas = [
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("for-you");
+  const [isCollaborativeCollapsed, setIsCollaborativeCollapsed] = useState(false);
   
   const handleGeneratePlaylist = () => {
     toast.success("Opening AI playlist generator...");
@@ -107,6 +108,10 @@ export default function Home() {
     // In a real implementation, this would open a dialog to create a collaborative playlist
   };
 
+  const toggleCollaborativeSection = () => {
+    setIsCollaborativeCollapsed(!isCollaborativeCollapsed);
+  };
+
   return (
     <div className="space-y-8">
       <section className="space-y-2">
@@ -114,6 +119,51 @@ export default function Home() {
         <p className="text-muted-foreground">
           Your social-first, AI-native music discovery platform
         </p>
+      </section>
+      
+      {/* Collaborative Opportunities Section - Always visible at the top */}
+      <section className="space-y-4 border rounded-lg p-4 bg-background/50">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-semibold">Collaborative Playlists</h2>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={handleCreateCollaboration}>
+              {React.createElement(Plus, { size: 16, weight: "duotone" })} New
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={toggleCollaborativeSection}
+              aria-label={isCollaborativeCollapsed ? "Expand" : "Collapse"}
+            >
+              {React.createElement(isCollaborativeCollapsed ? CaretDown : CaretUp, { size: 16, weight: "duotone" })}
+            </Button>
+          </div>
+        </div>
+        
+        {!isCollaborativeCollapsed && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {collaborativeOpportunities.map(opportunity => (
+              <Card key={opportunity.id}>
+                <CardHeader>
+                  <CardTitle>{opportunity.title}</CardTitle>
+                  <CardDescription>Created by {opportunity.creator}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm">{opportunity.description}</p>
+                  <div className="flex items-center justify-between mt-4 text-sm text-muted-foreground">
+                    <span>{opportunity.contributors} contributors</span>
+                    <span>{opportunity.tracks} tracks</span>
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button variant="default" className="w-full" onClick={() => handleJoinCollaboration(opportunity.id)}>
+                    {opportunity.creator === "You" ? "Continue Building" : "Join Collaboration"}
+                  </Button>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        )}
       </section>
       
       <Tabs defaultValue="for-you" value={activeTab} onValueChange={setActiveTab}>
@@ -132,39 +182,6 @@ export default function Home() {
         <TabsContent value="for-you" className="mt-6 space-y-8">
           {/* Daily AI Recommendations */}
           <DailyRecommendations />
-          
-          {/* Collaborative Opportunities */}
-          <section className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-semibold">Collaborative Playlists</h2>
-              <Button variant="outline" size="sm" onClick={handleCreateCollaboration}>
-                {React.createElement(Plus, { size: 16, weight: "duotone" })} New
-              </Button>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {collaborativeOpportunities.map(opportunity => (
-                <Card key={opportunity.id}>
-                  <CardHeader>
-                    <CardTitle>{opportunity.title}</CardTitle>
-                    <CardDescription>Created by {opportunity.creator}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm">{opportunity.description}</p>
-                    <div className="flex items-center justify-between mt-4 text-sm text-muted-foreground">
-                      <span>{opportunity.contributors} contributors</span>
-                      <span>{opportunity.tracks} tracks</span>
-                    </div>
-                  </CardContent>
-                  <CardFooter>
-                    <Button variant="default" className="w-full" onClick={() => handleJoinCollaboration(opportunity.id)}>
-                      {opportunity.creator === "You" ? "Continue Building" : "Join Collaboration"}
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))}
-            </div>
-          </section>
         </TabsContent>
         
         <TabsContent value="friends" className="mt-6 space-y-6">
