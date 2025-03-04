@@ -21,6 +21,44 @@ A modern web application for discovering, sharing, and collaborating on music pl
 - **State Management**: Zustand
 - **Deployment**: Vercel
 
+## Project Structure
+
+The project follows a clean `src/` directory structure:
+
+```
+reso/
+├── src/                      # Main source directory
+│   ├── app/                  # Next.js App Router pages
+│   │   ├── api/              # API routes
+│   │   ├── auth/             # Authentication pages
+│   │   ├── playlists/        # Playlist-related pages
+│   │   ├── profile/          # User profile pages
+│   │   ├── globals.css       # Global styles
+│   │   ├── layout.tsx        # Root layout
+│   │   └── page.tsx          # Home page
+│   ├── components/           # React components
+│   │   ├── auth/             # Authentication components
+│   │   ├── dashboard/        # Dashboard components
+│   │   ├── layout/           # Layout components
+│   │   ├── marketing/        # Marketing/landing page components
+│   │   ├── music/            # Music-related components
+│   │   ├── playlist/         # Playlist components
+│   │   ├── ui/               # UI components (from shadcn/ui)
+│   │   └── ...
+│   ├── lib/                  # Utilities and helpers
+│   │   ├── ai/               # AI-related utilities
+│   │   ├── auth/             # Authentication utilities
+│   │   ├── db/               # Database utilities
+│   │   ├── music/            # Music service integration
+│   │   ├── store/            # Zustand stores
+│   │   └── ...
+│   └── middleware.ts         # Next.js middleware
+├── prisma/                   # Prisma schema and migrations
+├── public/                   # Static assets
+├── docs/                     # Documentation
+└── ... (config files)
+```
+
 ## Getting Started
 
 ### Prerequisites
